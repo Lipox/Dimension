@@ -33,4 +33,6 @@
 
 # Mac
 *.DS_Store
-.idea/*
+.idea
+cmake-build-debug
+cmake-build-release
