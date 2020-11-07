@@ -4,7 +4,7 @@
 #include <string.h>
 #include <unordered_map>
 
-#include "../Common/hash.h"
+#include "hash.h"
 
 template<typename DATA_TYPE,typename COUNT_TYPE>
 class Abstract{

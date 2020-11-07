@@ -3,12 +3,12 @@
 
 #include <vector>
 
-#include "Algorithm/Count.h"
-#include "Algorithm/Count-Min.h"
-#include "Algorithm/Ours.h"
+#include "Count.h"
+#include "Count-Min.h"
+#include "Ours.h"
 
-#include "Common/MMap.h"
-#include "Common/Timer.h"
+#include "MMap.h"
+#include "Timer.h"
 
 
 template<typename DATA_TYPE,typename COUNT_TYPE>
