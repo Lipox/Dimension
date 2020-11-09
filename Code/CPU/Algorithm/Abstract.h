@@ -12,6 +12,8 @@ public:
     Abstract(){}
     virtual ~Abstract(){};
 
+    std::string name;
+
     virtual void Insert(const DATA_TYPE item) = 0;
     virtual COUNT_TYPE Query(const DATA_TYPE item) = 0;
 };

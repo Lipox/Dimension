@@ -3,9 +3,13 @@
 
 #include <vector>
 
-#include "Count.h"
-#include "Count-Min.h"
+#include "RHHH.h"
+#include "Univmon.h"
+#include "Elastic.h"
+#include "BeauCoup.h"
+
 #include "Ours.h"
+#include "SimpleOurs.h"
 
 #include "MMap.h"
 #include "Timer.h"
@@ -15,16 +19,17 @@ template<typename DATA_TYPE,typename COUNT_TYPE>
 class BenchMark{
 public:
 
-    typedef std::vector<Abstract<DATA_TYPE, COUNT_TYPE>*> AbsVector;
+    typedef Abstract<DATA_TYPE, COUNT_TYPE>* Sketch;
+    typedef std::vector<Sketch> SketchVector;
     typedef std::unordered_map<DATA_TYPE, COUNT_TYPE> HashMap;
 
     BenchMark(const char* PATH){
         result = Load(PATH);
-        start = (DATA_TYPE*)result.start;
+        dataset = (DATA_TYPE*)result.start;
         length = result.length / sizeof(DATA_TYPE);
 
         for(uint64_t i = 0;i < length;++i){
-            mp[start[i]] += 1;
+            mp[dataset[i]] += 1;
         }
     }
 
@@ -32,69 +37,85 @@ public:
         UnLoad(result);
     }
 
-    void SketchError(uint32_t K){
-        uint32_t interval = length / K;
+    void Parameter(double alpha){
+        SketchVector sketches = {
+                new Ours<DATA_TYPE, COUNT_TYPE>(300000, 2, "HASH=2"),
+                new SimpleOurs<DATA_TYPE, COUNT_TYPE>(600000, "HASH=1"),
+        };
 
-        vector<AbsVector> algs(K);
-        for(uint32_t i = 0;i < K;++i){
-            algs[i] = {
-                //new CM<DATA_TYPE, COUNT_TYPE>(1000000, 1),
-                //new Count<DATA_TYPE, COUNT_TYPE>(1000000, 1),
-                new Ours<DATA_TYPE, COUNT_TYPE>(500000, 1),
-                new Priority<DATA_TYPE, COUNT_TYPE>(500000, 1),
-                //new Ours<DATA_TYPE, COUNT_TYPE>(2000000, 1),
-            };
-
-            if(i == K - 1){
-                BenchInsert(algs[i], &start[interval * i], length - interval * (K - 1));
-            }
-            else{
-                BenchInsert(algs[i], &start[interval * i], interval);
-            }
+        for(auto sketch : sketches){
+            SketchThp(sketch);
+            FECheckError(sketch);
+            HHCheckError(sketch, alpha * length);
+            delete sketch;
         }
-
-        CheckError(algs, K);
-        std::cout << K << ": End" << endl << endl;
     }
 
 private:
     LoadResult result;
 
-    DATA_TYPE* start;
+    DATA_TYPE* dataset;
     uint64_t length;
 
     HashMap mp;
 
-    void BenchInsert(AbsVector sketches, DATA_TYPE* data, uint32_t size){
+
+    void SketchThp(Sketch sketch){
+        TP start, finish;
+
+        start = now();
+        SketchInsert(sketch, dataset, length);
+        finish = now();
+
+        cout << sketch->name << endl;
+        cout << "Thp: " << length / durationms(finish, start) << endl;
+    }
+
+    inline void SketchInsert(Sketch sketch, DATA_TYPE* data, uint32_t size){
         for(uint32_t i = 0;i < size;++i){
-            for(auto sketch : sketches)
-                sketch->Insert(data[i]);
+            sketch->Insert(data[i]);
         }
     }
 
-    void CheckError(vector<AbsVector> algs, uint32_t K){
-        uint32_t size = algs[0].size();
+    void FECheckError(Sketch sketch){
+        double aae = 0, are = 0;
 
-        for(uint32_t i = 0;i < size;++i){
-            double aae = 0, are = 0, number = 0;
+        for(auto it = mp.begin();it != mp.end();++it){
+            COUNT_TYPE estimated = sketch->Query(it->first);
+            aae += abs(it->second - estimated);
+            are += abs(it->second - estimated) / (double)it->second;
+        }
 
-            for(auto it = mp.begin();it != mp.end();++it){
-                if(it->second > 100){
-                    number += 1;
+        cout << sketch->name << endl;
+        cout << "AAE: " << aae / mp.size() << endl;
+        cout << "ARE: " << are / mp.size() << endl;
+    }
 
-                    COUNT_TYPE estimated = 0;
-                    for(uint32_t j = 0;j < K;++j) {
-                        estimated += algs[j][i]->Query(it->first);
-                    }
+    void HHCheckError(Sketch sketch, uint32_t thres){
+        double aae = 0, are = 0, hh_record = 0, hh = 0, hh_hat = 0;
 
+        for(auto it = mp.begin();it != mp.end();++it){
+            COUNT_TYPE estimated = sketch->Query(it->first);
+
+            if(it->second > thres){
+                hh += 1;
+                if(estimated > thres){
+                    hh_record += 1;
                     aae += abs(it->second - estimated);
                     are += abs(it->second - estimated) / (double)it->second;
                 }
             }
 
-            std::cout << "AAE: " << aae / number << std::endl
-                      << "ARE: " << are / number << std::endl;
+            if(estimated > thres){
+                hh_hat += 1;
+            }
         }
+
+        cout << sketch->name << endl;
+        cout << "AAE: " << aae / hh_record << endl;
+        cout << "ARE: " << are / hh_record << endl;
+        cout << "CR: " << hh_record / hh << endl;
+        cout << "PR: " << hh_record / hh_hat << endl;
     }
 };
 

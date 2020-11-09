@@ -11,8 +11,13 @@ public:
         COUNT_TYPE count;
     };
 
-    Ours(uint32_t _LENGTH, uint32_t _HASH_NUM):
-            LENGTH(_LENGTH), HASH_NUM(_HASH_NUM){
+    Ours(uint32_t _MEMORY, uint32_t _HASH_NUM, std::string _name = "Ours"){
+        this->name = _name;
+
+        MEMORY = _MEMORY;
+        HASH_NUM = _HASH_NUM;
+        LENGTH = MEMORY / HASH_NUM / sizeof(Counter);
+
         counter = new Counter*[HASH_NUM];
         for(uint32_t i = 0;i < HASH_NUM;++i){
             counter[i] = new Counter[LENGTH];
@@ -30,7 +35,7 @@ public:
         for(uint32_t i = 0;i < HASH_NUM;++i){
             uint32_t position = hash(item, i) % LENGTH;
             counter[i][position].count += 1;
-            if(rd() % (int32_t)counter[i][position].count == 0){
+            if(randomGenerator() % counter[i][position].count == 0){
                 counter[i][position].ID = item;
             }
         }
@@ -48,8 +53,9 @@ public:
     }
 
 private:
-    const uint32_t LENGTH;
-    const uint32_t HASH_NUM;
+    uint32_t MEMORY;
+    uint32_t LENGTH;
+    uint32_t HASH_NUM;
 
     Counter** counter;
 };

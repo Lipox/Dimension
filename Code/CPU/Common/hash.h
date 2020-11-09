@@ -6,10 +6,24 @@
 #include <limits.h>
 #include <stdint.h>
 
-static std::random_device rd;
+template<typename DATA_TYPE>
+inline uint32_t hash(DATA_TYPE data, uint32_t seed = 0);
+inline uint32_t randomGenerator();
 
-static std::uniform_real_distribution<double> dis(0, 1);
+
+static std::random_device rd;
 static std::mt19937 rng(rd());
+static std::uniform_real_distribution<double> dis(0, 1);
+
+#ifdef __linux__
+inline uint32_t randomGenerator(){
+    return rand();
+}
+#else
+inline uint32_t randomGenerator(){
+    return rng();
+}
+#endif
 
 #define MAX_PRIME 1229
 
@@ -227,7 +241,7 @@ public:
 };
 
 template<typename DATA_TYPE>
-inline uint32_t hash(DATA_TYPE data, uint32_t seed = 0){
+inline uint32_t hash(DATA_TYPE data, uint32_t seed){
     return Hash::BOBHash32((uint8_t*)&data, sizeof(DATA_TYPE), seed);
 }
 

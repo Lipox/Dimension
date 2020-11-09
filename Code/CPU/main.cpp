@@ -1,23 +1,15 @@
 #include "benchmark.h"
 
 const char* file[] = {
-        "../../Data/syn.dat",
-        "../../Data/web.dat",
-        "../../Data/net.dat",
-//        "../../Data/ip.dat",
+        "/Users/zyd/Documents/Data/ip.dat"
+        //in server /zhangyd/Data/ip.dat
 };
 
 int main() {
-
-    for(uint32_t i = 0;i < 3;++i){
+    for(uint32_t i = 0;i < 1;++i){
         std::cout << file[i] << std::endl;
-        BenchMark<uint32_t, int32_t> dataset(file[i]);
-        dataset.SketchError(1);
-        dataset.SketchError(2);
-        dataset.SketchError(4);
-        dataset.SketchError(8);
-        dataset.SketchError(16);
+        BenchMark<uint64_t, int64_t> dataset(file[i]);
+        dataset.Parameter(0.001);
     }
-
     return 0;
 }

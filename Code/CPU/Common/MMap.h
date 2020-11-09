@@ -4,9 +4,6 @@
 #include <fcntl.h>
 #include <stdint.h>
 
-#include <sys/stat.h>
-#include <sys/mman.h>
-
 #include <iostream>
 
 using namespace std;
@@ -15,6 +12,16 @@ struct LoadResult{
     void* start;
     uint64_t length;
 };
+
+LoadResult Load(const char* PATH);
+void UnLoad(LoadResult result);
+
+
+#ifdef _WIN64
+    //Load into an array and return as the same struct
+#else
+#include <sys/stat.h>
+#include <sys/mman.h>
 
 LoadResult Load(const char* PATH){
     LoadResult ret;
@@ -43,5 +50,6 @@ LoadResult Load(const char* PATH){
 void UnLoad(LoadResult result){
     munmap(result.start, result.length);
 }
+#endif
 
 #endif //DISTRIBUTE_MMAP_H
