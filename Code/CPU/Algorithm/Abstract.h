@@ -3,6 +3,7 @@
 
 #include <string.h>
 #include <unordered_map>
+#include <iostream>
 
 #include "hash.h"
 

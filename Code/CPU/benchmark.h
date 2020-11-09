@@ -9,6 +9,7 @@
 #include "BeauCoup.h"
 
 #include "Ours.h"
+#include "CUOurs.h"
 #include "SimpleOurs.h"
 
 #include "MMap.h"
@@ -40,6 +41,7 @@ public:
     void Parameter(double alpha){
         SketchVector sketches = {
                 new Ours<DATA_TYPE, COUNT_TYPE>(300000, 2, "HASH=2"),
+                new CUOurs<DATA_TYPE, COUNT_TYPE>(300000, 2, "CU-HASH=2"),
                 new SimpleOurs<DATA_TYPE, COUNT_TYPE>(600000, "HASH=1"),
         };
 
