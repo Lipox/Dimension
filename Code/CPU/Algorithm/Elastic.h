@@ -49,8 +49,7 @@ public:
 				min_counter_val = buckets[position].values[i];
 			}
 		}
-		//printf("matched = %d,empty = %d, min_counter_val = %d \n", matched, empty, min_counter_val);
-
+		
 		/* if matched */
 		if (matched != -1) {
 			buckets[position].values[matched] += 1;
