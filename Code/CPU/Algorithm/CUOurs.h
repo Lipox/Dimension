@@ -1,5 +1,5 @@
-#ifndef CPU_CUOUS_H
-#define CPU_CUOUS_H
+#ifndef CPU_CUOURS_H
+#define CPU_CUOURS_H
 
 #include "Abstract.h"
 
