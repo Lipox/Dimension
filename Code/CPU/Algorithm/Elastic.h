@@ -6,14 +6,15 @@
 
 #define COUNTER_PER_BUCKET 4
 #define LAMBDA 8
-#define HEAVY_PART_LENGTH 250000
-#define LIGHT_PART_LENGTH 1000000
+#define HEAVY_PART_RATIO 0.25
+#define LIGHT_PART_RATIO (1 - HEAVY_PART_RATIO)
 
 template<typename DATA_TYPE,typename HEAVY_TYPE>
 class HeavyPart {
 public:
 
-	HeavyPart(){
+	HeavyPart(int tot_memory_in_bytes){
+		HEAVY_PART_LENGTH = (int)(tot_memory_in_bytes * HEAVY_PART_RATIO) / sizeof(Bucket);
 		buckets = new Bucket[HEAVY_PART_LENGTH];
 		clear();
 	}
@@ -49,7 +50,8 @@ public:
 				min_counter_val = buckets[position].values[i];
 			}
 		}
-		
+		//printf("matched = %d,empty = %d, min_counter_val = %d \n", matched, empty, min_counter_val);
+
 		/* if matched */
 		if (matched != -1) {
 			buckets[position].values[matched] += 1;
@@ -105,13 +107,15 @@ private:
 	};
 
 	Bucket* buckets;
+	int HEAVY_PART_LENGTH;
 };
 
 template<typename DATA_TYPE,typename LIGHT_TYPE>
 class LightPart {
 public:
 
-	LightPart(){
+	LightPart(int tot_memory_in_bytes){
+		LIGHT_PART_LENGTH = (int)(tot_memory_in_bytes * LIGHT_PART_RATIO) / sizeof(LIGHT_TYPE);
 		counters = new LIGHT_TYPE[LIGHT_PART_LENGTH];
 		clear();
 	}
@@ -143,6 +147,7 @@ public:
 	}
 
 private:
+	int LIGHT_PART_LENGTH;
 	LIGHT_TYPE* counters;
 };
 
@@ -150,28 +155,36 @@ template<typename DATA_TYPE, typename COUNT_TYPE>
 class Elastic : public Abstract<DATA_TYPE, COUNT_TYPE> {
 	//typedef LIGHT_TYPE COUNT_TYPE;
 public:
-	Elastic(){}
+	Elastic(int tot_memory_in_bytes)
+	{
+		heavy_part = new HeavyPart<DATA_TYPE, COUNT_TYPE>(tot_memory_in_bytes);
+		light_part = new LightPart<DATA_TYPE, COUNT_TYPE>(tot_memory_in_bytes);
+		clear();
+	}
 
-	~Elastic(){}
+	~Elastic(){
+		delete heavy_part;
+		delete light_part;
+	}
 
 	void clear()
 	{
-		heavy_part.clear();
-		light_part.clear();
+		heavy_part->clear();
+		light_part->clear();
 	}
 
 	void Insert(const DATA_TYPE item) {
 		COUNT_TYPE swap_val = 0;
-		uint32_t result = heavy_part.insert(item, swap_val);
+		uint32_t result = heavy_part->insert(item, swap_val);
 
 		switch (result){
 			case 0: return;
 			case 1: {
-				light_part.insert(item);
+				light_part->insert(item);
 				return;
 			}
 			case 2: {
-				light_part.insert(item, swap_val);
+				light_part->insert(item, swap_val);
 				return;
 			}
 			default: {
@@ -183,17 +196,18 @@ public:
 
 	COUNT_TYPE Query(const DATA_TYPE item) {
 		uint8_t flag = 0;
-		COUNT_TYPE heavy_result = heavy_part.query(item, flag);
+		COUNT_TYPE heavy_result = heavy_part->query(item, flag);
 		if (heavy_result == 0 || flag == 1) {
-			COUNT_TYPE light_result = light_part.query(item);
+			COUNT_TYPE light_result = light_part->query(item);
 			return heavy_result + light_result;
 		}
 		return heavy_result;
 	}
 
 private:
-	HeavyPart<DATA_TYPE, COUNT_TYPE> heavy_part;
-	LightPart<DATA_TYPE, COUNT_TYPE> light_part;
+
+	HeavyPart<DATA_TYPE, COUNT_TYPE>* heavy_part;
+	LightPart<DATA_TYPE, COUNT_TYPE>* light_part;
 
 };
 
