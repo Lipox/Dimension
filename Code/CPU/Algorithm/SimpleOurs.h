@@ -8,6 +8,8 @@
 template<typename DATA_TYPE,typename COUNT_TYPE>
 class SimpleOurs : public Abstract<DATA_TYPE, COUNT_TYPE>{
 public:
+    typedef std::unordered_map<DATA_TYPE, COUNT_TYPE> HashMap;
+
     struct Counter{
         DATA_TYPE ID;
         COUNT_TYPE count;
@@ -39,6 +41,16 @@ public:
         uint32_t position = hash(item) % LENGTH;
         return counter[position].ID == item? counter[position].count : 0;
     }
+
+    HashMap Merge(const DATA_TYPE mask){
+        HashMap ret;
+
+        for(uint32_t j = 0;j < LENGTH;++j){
+            ret[counter[j].ID & mask] += counter[j].count;
+        }
+
+        return ret;
+    };
 
 private:
     uint32_t MEMORY;

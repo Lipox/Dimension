@@ -6,6 +6,8 @@
 template<typename DATA_TYPE,typename COUNT_TYPE>
 class Ours : public Abstract<DATA_TYPE, COUNT_TYPE>{
 public:
+    typedef std::unordered_map<DATA_TYPE, COUNT_TYPE> HashMap;
+
     struct Counter{
         DATA_TYPE ID;
         COUNT_TYPE count;
@@ -51,6 +53,23 @@ public:
         }
         return ret / HASH_NUM;
     }
+
+    HashMap Merge(const DATA_TYPE mask){
+        HashMap ret;
+        HashMap used;
+
+        for(uint32_t i = 0;i < HASH_NUM;++i){
+            for(uint32_t j = 0;j < LENGTH;++j){
+                if(used.find(counter[i][j].ID) == used.end()){
+                    used[counter[i][j].ID] = 1;
+                    DATA_TYPE ID = counter[i][j].ID & mask;
+                    ret[ID] += Query(counter[i][j].ID);
+                }
+            }
+        }
+
+        return ret;
+    };
 
 private:
     uint32_t MEMORY;

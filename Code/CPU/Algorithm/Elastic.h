@@ -4,211 +4,119 @@
 #include <cmath>
 #include "Abstract.h"
 
-#define COUNTER_PER_BUCKET 4
+#define COUNTER_PER_BUCKET 7
 #define LAMBDA 8
-#define HEAVY_PART_RATIO 0.25
-#define LIGHT_PART_RATIO (1 - HEAVY_PART_RATIO)
+#define MAXNUM 0xff
 
-template<typename DATA_TYPE,typename HEAVY_TYPE>
-class HeavyPart {
-public:
-
-	HeavyPart(int tot_memory_in_bytes){
-		HEAVY_PART_LENGTH = (int)(tot_memory_in_bytes * HEAVY_PART_RATIO) / sizeof(Bucket);
-		buckets = new Bucket[HEAVY_PART_LENGTH];
-		clear();
-	}
-
-	~HeavyPart() {
-		delete[] buckets;
-	}
-
-	void clear()
-	{
-		memset(buckets, 0, sizeof(Bucket) * HEAVY_PART_LENGTH);
-	}
-
-	uint32_t insert(const DATA_TYPE key, HEAVY_TYPE& swap_val) {
-		uint32_t position = hash(key) % HEAVY_PART_LENGTH;
-		
-		int matched = -1, empty = -1, min_counter_key = 0, min_counter_val = INT_MAX;
-
-		for (uint32_t i = 0; i < COUNTER_PER_BUCKET; i++)
-		{
-			if (buckets[position].keys[i] == key)
-			{
-				matched = i;
-				break;
-			}
-			if (buckets[position].keys[i] == 0 && empty == -1)
-			{
-				empty = i;
-			}
-			if (buckets[position].values[i] < min_counter_val)
-			{
-				min_counter_key = i;
-				min_counter_val = buckets[position].values[i];
-			}
-		}
-		//printf("matched = %d,empty = %d, min_counter_val = %d \n", matched, empty, min_counter_val);
-
-		/* if matched */
-		if (matched != -1) {
-			buckets[position].values[matched] += 1;
-			return 0;
-		}
-
-		/* if there has empty bucket */
-		if (empty != -1) {
-			buckets[position].keys[empty] = key;
-			buckets[position].values[empty] = 1;
-			return 0;
-		}
-
-		/* no matched */
-		if ((buckets[position].minus_vote + 1) >= min_counter_val * LAMBDA)
-		{
-			buckets[position].minus_vote = 0;
-			buckets[position].flags[min_counter_key] = 1;
-			swap_val = buckets[position].values[min_counter_key];
-			buckets[position].keys[min_counter_key] = key;
-			buckets[position].values[min_counter_key] = 1;
-
-			return 2;
-		}
-		else {
-			buckets[position].minus_vote += 1;
-			return 1;
-		}
-	}
-
-	HEAVY_TYPE query(const DATA_TYPE key, uint8_t& flag) {
-		uint32_t position = hash(key) % HEAVY_PART_LENGTH;
-		
-		for (size_t i = 0; i < COUNTER_PER_BUCKET; i++)
-		{
-			if (buckets[position].keys[i] == key)
-			{
-				flag = buckets[position].flags[i];
-				return buckets[position].values[i];
-			}
-		}
-
-		return 0;
-	}
-
-private:
-	struct Bucket
-	{
-		DATA_TYPE keys[COUNTER_PER_BUCKET];
-		HEAVY_TYPE values[COUNTER_PER_BUCKET];
-		uint8_t flags[COUNTER_PER_BUCKET];
-		HEAVY_TYPE minus_vote;
-	};
-
-	Bucket* buckets;
-	int HEAVY_PART_LENGTH;
-};
-
-template<typename DATA_TYPE,typename LIGHT_TYPE>
-class LightPart {
-public:
-
-	LightPart(int tot_memory_in_bytes){
-		LIGHT_PART_LENGTH = (int)(tot_memory_in_bytes * LIGHT_PART_RATIO) / sizeof(LIGHT_TYPE);
-		counters = new LIGHT_TYPE[LIGHT_PART_LENGTH];
-		clear();
-	}
-
-	~LightPart() {
-		delete[] counters;
-	}
-
-	void clear()
-	{
-		memset(counters, 0, sizeof(LIGHT_TYPE) * LIGHT_PART_LENGTH);
-	}
-
-	void insert(const DATA_TYPE key, LIGHT_TYPE f = 1) {
-		uint32_t position = hash(key) % LIGHT_PART_LENGTH;
-		LIGHT_TYPE max_num = (LIGHT_TYPE)pow(2, sizeof(LIGHT_TYPE) * 8) - 1;
-
-		LIGHT_TYPE old_val = counters[position];
-		LIGHT_TYPE new_val = counters[position] + f;
-
-		new_val = new_val > max_num ? max_num : new_val;
-
-		counters[position] = new_val;
-	}
-
-	LIGHT_TYPE query(const DATA_TYPE key) {
-		uint32_t position = hash(key) % LIGHT_PART_LENGTH;
-		return counters[position];
-	}
-
-private:
-	int LIGHT_PART_LENGTH;
-	LIGHT_TYPE* counters;
-};
 
 template<typename DATA_TYPE, typename COUNT_TYPE>
 class Elastic : public Abstract<DATA_TYPE, COUNT_TYPE> {
-	//typedef LIGHT_TYPE COUNT_TYPE;
 public:
-	Elastic(int tot_memory_in_bytes)
-	{
-		heavy_part = new HeavyPart<DATA_TYPE, COUNT_TYPE>(tot_memory_in_bytes);
-		light_part = new LightPart<DATA_TYPE, COUNT_TYPE>(tot_memory_in_bytes);
-		clear();
+
+    typedef uint8_t LIGHT_TYPE;
+
+    struct Bucket{
+        COUNT_TYPE vote;
+        uint8_t flags[COUNTER_PER_BUCKET];
+        DATA_TYPE ID[COUNTER_PER_BUCKET];
+        COUNT_TYPE count[COUNTER_PER_BUCKET];
+
+        COUNT_TYPE Query(const DATA_TYPE item, uint8_t& flag) {
+            for(uint32_t i = 0; i < COUNTER_PER_BUCKET; i++) {
+                if(ID[i] == item) {
+                    flag = flags[i];
+                    return count[i];
+                }
+            }
+            return 0;
+        }
+    };
+
+	Elastic(uint32_t _MEMORY, std::string _name = "Elastic"){
+	    this->name = _name;
+
+	    HEAVY_LENGTH = _MEMORY * HEAVY_RATIO / sizeof(Bucket);
+        LIGHT_LENGTH = _MEMORY * LIGHT_RATIO / sizeof(LIGHT_TYPE);
+
+        buckets = new Bucket[HEAVY_LENGTH];
+        counters = new LIGHT_TYPE[LIGHT_LENGTH];
+
+        memset(buckets, 0, sizeof(Bucket) * HEAVY_LENGTH);
+        memset(counters, 0, sizeof(LIGHT_TYPE) * LIGHT_LENGTH);
 	}
 
 	~Elastic(){
-		delete heavy_part;
-		delete light_part;
-	}
-
-	void clear()
-	{
-		heavy_part->clear();
-		light_part->clear();
+        delete [] counters;
+        delete [] buckets;
 	}
 
 	void Insert(const DATA_TYPE item) {
-		COUNT_TYPE swap_val = 0;
-		uint32_t result = heavy_part->insert(item, swap_val);
+        uint32_t pos = hash(item) % HEAVY_LENGTH, minPos = 0;
+        COUNT_TYPE minVal = 0;
 
-		switch (result){
-			case 0: return;
-			case 1: {
-				light_part->insert(item);
-				return;
-			}
-			case 2: {
-				light_part->insert(item, swap_val);
-				return;
-			}
-			default: {
-				printf("error return value !\n");
-				exit(1);
-			}
-		}
+        for (uint32_t i = 0; i < COUNTER_PER_BUCKET; i++){
+            if(buckets[pos].ID[i] == item){
+                buckets[pos].count[i] += 1;
+                return;
+            }
+
+            if(buckets[pos].count[i] == 0){
+                buckets[pos].ID[i] = item;
+                buckets[pos].count[i] = 1;
+                return;
+            }
+
+            if(buckets[pos].count[i] < minVal){
+                minPos = i;
+                minVal = buckets[pos].count[i];
+            }
+        }
+
+        if((buckets[pos].vote + 1) >= minVal * LAMBDA){
+            buckets[pos].vote = 0;
+            buckets[pos].flags[minPos] = 1;
+
+            Light_Insert(buckets[pos].ID[minPos], buckets[pos].count[minPos]);
+
+            buckets[pos].ID[minPos] = item;
+            buckets[pos].count[minPos] = 1;
+        }
+        else {
+            buckets[pos].vote += 1;
+            Light_Insert(item);
+        }
 	}
 
 	COUNT_TYPE Query(const DATA_TYPE item) {
-		uint8_t flag = 0;
-		COUNT_TYPE heavy_result = heavy_part->query(item, flag);
-		if (heavy_result == 0 || flag == 1) {
-			COUNT_TYPE light_result = light_part->query(item);
-			return heavy_result + light_result;
+		uint8_t flag = 1;
+		COUNT_TYPE result = buckets[hash(item) % HEAVY_LENGTH].Query(item, flag);
+		if(flag){
+		    return result + counters[hash(item, 101) % LIGHT_LENGTH];
 		}
-		return heavy_result;
+		else{
+		    return result;
+		}
 	}
 
 private:
 
-	HeavyPart<DATA_TYPE, COUNT_TYPE>* heavy_part;
-	LightPart<DATA_TYPE, COUNT_TYPE>* light_part;
+    const double HEAVY_RATIO = 0.25;
+    const double LIGHT_RATIO = 0.75;
 
+    uint32_t LIGHT_LENGTH;
+    uint32_t HEAVY_LENGTH;
+
+    LIGHT_TYPE* counters;
+    Bucket* buckets;
+
+    void Light_Insert(const DATA_TYPE item, COUNT_TYPE val = 1) {
+        uint32_t position = hash(item, 101) % LIGHT_LENGTH;
+
+        COUNT_TYPE old_val = counters[position];
+        COUNT_TYPE new_val = counters[position] + val;
+
+        counters[position] = (new_val > MAXNUM ? MAXNUM : new_val);
+    }
 };
 
 #endif //CPU_ELASTIC_H
