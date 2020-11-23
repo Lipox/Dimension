@@ -6,14 +6,14 @@
 
 #define COUNTER_PER_BUCKET 7
 #define LAMBDA 8
-#define MAXNUM 0xff
+#define MAXNUM 0xffff
 
 
 template<typename DATA_TYPE, typename COUNT_TYPE>
 class Elastic : public Abstract<DATA_TYPE, COUNT_TYPE> {
 public:
 
-    typedef uint8_t LIGHT_TYPE;
+    typedef uint16_t LIGHT_TYPE;
 
     struct Bucket{
         COUNT_TYPE vote;
@@ -97,6 +97,17 @@ public:
 		    return result;
 		}
 	}
+
+    COUNT_TYPE HHQuery(const DATA_TYPE item){
+        uint8_t flag = 1;
+        COUNT_TYPE result = buckets[hash(item) % HEAVY_LENGTH].Query(item, flag);
+        if(result > 0 && flag){
+            return result + counters[hash(item, 101) % LIGHT_LENGTH];
+        }
+        else{
+            return result;
+        }
+    }
 
 private:
 

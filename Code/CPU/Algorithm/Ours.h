@@ -54,6 +54,10 @@ public:
         return ret / HASH_NUM;
     }
 
+    COUNT_TYPE HHQuery(const DATA_TYPE item){
+        return Query(item);
+    }
+
     HashMap Merge(const DATA_TYPE mask){
         HashMap ret;
         HashMap used;
