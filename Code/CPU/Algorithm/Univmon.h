@@ -1,7 +1,33 @@
-#ifndef STREAMMEASUREMENTSYSTEM_UNIVMON_H
-#define STREAMMEASUREMENTSYSTEM_UNIVMON_H
+#ifndef CPU_UNIVMON_H
+#define CPU_UNIVMON_H
 
 #include "Abstract.h"
+using std::min;
+using std::swap;
+
+template<typename SORT_TYPE>
+void Sort(SORT_TYPE* p1, SORT_TYPE* p2){
+    if (p1 >= p2)  return;
+    SORT_TYPE* i,* j;
+    SORT_TYPE p, tmp; 
+    i = p1;
+    j = p2;                                                            
+    p = *p1;                              
+
+    while(i < j) {                                                   
+        while (*i <= p)                                                                  
+            i++;
+        while (p <= *j)                                                                  
+            j--;
+        if ( i >= j)
+            break;
+        *i += *j;
+        *j = *i - *j;
+        *i -= *j;
+    } 
+    Sort(p1, i-1); 
+    Sort(j+1, p2); 
+}
 
 template<typename DATA_TYPE,typename COUNT_TYPE>
 class CountHeap : public Abstract<DATA_TYPE, COUNT_TYPE>{
@@ -14,11 +40,11 @@ public:
     uint32_t LENGTH;
     uint32_t HASH_NUM;
     uint32_t capacity;
-    uint32_t heap_element_num;  //堆中元素个数
+    uint32_t heap_element_num;
 
-    Counter * heap;  //记录出现次数最多的元素及他出现的次数
+    Counter * heap; 
     COUNT_TYPE ** c_sketch;
-    unordered_map<DATA_TYPE, COUNT_TYPE> ht;  //记录元素在堆中的位置
+    std::unordered_map<DATA_TYPE, COUNT_TYPE> ht; 
 
     CountHeap(uint32_t _MEMORY, uint32_t _HASH_NUM, std::string _name = "CountHeap"){
         this->name = _name;
@@ -28,10 +54,10 @@ public:
         LENGTH = MEMORY / HASH_NUM / sizeof(Counter) / 2;
         capacity = MEMORY / sizeof(Counter) / 4;
 
-        c_sketch = new Counter*[HASH_NUM];
+        c_sketch = new COUNT_TYPE*[HASH_NUM];
         for(uint32_t i = 0;i < HASH_NUM; ++i){
-            counter[i] = new Counter[LENGTH];
-            memset(counter[i], 0, sizeof(Counter) * LENGTH);
+            c_sketch[i] = new COUNT_TYPE[LENGTH];
+            memset(c_sketch[i], 0, sizeof(COUNT_TYPE) * LENGTH);
         }
         heap = new Counter[capacity];
         ht.clear();
@@ -43,10 +69,9 @@ public:
         delete [] c_sketch;
         delete [] heap;
         ht.clear();
-        delete [] ht;
     }
 
-    double get_f2() //返回sketch中记录的平方和的中位数
+    double get_f2()
     {
         double res[HASH_NUM];
         for (int i = 0; i < HASH_NUM; ++i) {
@@ -57,7 +82,7 @@ public:
             res[i] = est;
         }
 
-        sort(res, res + LENGTH);
+        Sort(res, res + LENGTH);
         if (HASH_NUM % 2) {
             return res[LENGTH / 2];
         } else {
@@ -65,7 +90,7 @@ public:
         }
     }
 
-    void heap_adjust_down(int i) {  //调整元素在堆中位置
+    void heap_adjust_down(int i) {
         while (i <= heap_element_num / 2) {
             int l_child = 2 * i + 1;
             int r_child = 2 * i + 2;
@@ -86,10 +111,10 @@ public:
         }
     }
 
-    void heap_adjust_up(int i) {  //调整元素在堆中位置
+    void heap_adjust_up(int i) {  
         while (i >= 1) {
             int parent = (i - 1) / 2;
-            if (heap[parent] <= heap[i].count) {
+            if (heap[parent].count <= heap[i].count) {
                 break;
             }
             swap(heap[i], heap[parent]);
@@ -105,9 +130,9 @@ public:
             int polar = hash(item, i + HASH_NUM) % 2;
             c_sketch[i][position] += polar ? 1 : -1;
             COUNT_TYPE val = c_sketch[i][position];
-            ans = polar ? val : -val;
+            ans[i] = polar ? val : -val;
         }
-        sort(ans, ans + LENGTH);
+        Sort(ans, ans + LENGTH);
 
         COUNT_TYPE tmin;
         if (LENGTH % 2 == 0) {
@@ -123,7 +148,7 @@ public:
         } else if (heap_element_num < capacity) {
             heap[heap_element_num].ID = item;
             heap[heap_element_num].count = tmin;
-            ht[str_key] = heap_element_num;
+            ht[item] = heap_element_num;
             ++heap_element_num;
             heap_adjust_up(heap_element_num - 1);
         } else if (tmin > heap[0].count) {
@@ -142,9 +167,9 @@ public:
             uint32_t position = hash(item, i) % LENGTH;
             int polar = hash(item, i + HASH_NUM) % 2;
             COUNT_TYPE val = c_sketch[i][position];
-            ans = polar ? val : -val;
+            ans[i] = polar ? val : -val;
         }
-        sort(ans, ans + LENGTH);
+        Sort(ans, ans + LENGTH);
 
         COUNT_TYPE tmin;
         if (LENGTH % 2 == 0) {
@@ -162,7 +187,7 @@ public:
             a[i].first = heap[i].ID;
             a[i].second = heap[i].count;
         }
-        sort(a, a + capacity);
+        Sort(a, a + capacity);
         int i;
         for (i = 0; i < k && i < capacity; ++i) {
             result[i].first = a[capacity - 1 - i].first;
@@ -175,7 +200,7 @@ public:
         get_top_k_with_frequency(capacity, result);
         double f2 = get_f2();
         for (int i = 0; i < capacity; ++i) {
-            if ((double(result[i].second)*(double(result[i].second)) < alpha * f2) {
+            if ((double(result[i].second))*(double(result[i].second)) < alpha * f2) {
                 result.resize(i);
                 return;
             }
@@ -196,6 +221,10 @@ public:
 template<typename DATA_TYPE,typename COUNT_TYPE>
 class UnivMon : public Abstract<DATA_TYPE, COUNT_TYPE>{
 public:
+    struct Counter{
+        DATA_TYPE ID;
+        COUNT_TYPE count;
+    };
     uint32_t MEMORY;
     uint32_t LENGTH;
     uint32_t HASH_NUM;
@@ -215,7 +244,7 @@ public:
         sketches = new L2HitterDetector*[level];
 
         for(uint32_t i = 0;i < level; ++i){
-            sketches[i] = new L2HitterDetector(MEMORY/10, HASH_NUM, "CountHeap" + to_string(i)) ;
+            sketches[i] = new L2HitterDetector(MEMORY/10, HASH_NUM, "CountHeap" + std::to_string(i)) ;
         }
     }
 
@@ -280,7 +309,7 @@ public:
 
     void get_heavy_hitters(uint32_t threshold, std::vector<std::pair<DATA_TYPE, COUNT_TYPE> >& ret)
     {
-        unordered_map<DATA_TYPE, COUNT_TYPE> results;
+        std::unordered_map<DATA_TYPE, COUNT_TYPE> results;
         std::vector<std::pair<DATA_TYPE, COUNT_TYPE>> vec_top_k(k);
         for (int i = level - 1; i >= 0; --i) {
             sketches[i]->get_top_k_with_frequency(k, vec_top_k);
@@ -302,4 +331,4 @@ public:
 
 };
 
-#endif //STREAMMEASUREMENTSYSTEM_UNIVMON_H
+#endif //CPU_UNIVMON_H
