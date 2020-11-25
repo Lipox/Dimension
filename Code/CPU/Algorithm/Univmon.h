@@ -230,7 +230,7 @@ public:
     uint32_t HASH_NUM;
     uint32_t level;
     uint32_t element_num;
-    static constexpr uint16_t k = 1000;
+    static uint16_t k = 1000;
     typedef CountHeap<DATA_TYPE, COUNT_TYPE> L2HitterDetector;
     L2HitterDetector ** sketches;
     
