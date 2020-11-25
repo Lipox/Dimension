@@ -39,6 +39,14 @@ public:
         }
     }
 
+    static uint32_t Size2Memory(uint32_t size){
+        return size / LOAD * (sizeof(KEY_TYPE) + sizeof(VALUE_TYPE));
+    }
+
+    static uint32_t Memory2Size(uint32_t memory){
+        return memory * LOAD / (sizeof(KEY_TYPE) + sizeof(VALUE_TYPE));
+    }
+
     inline uint32_t size(){
         return inserted;
     }

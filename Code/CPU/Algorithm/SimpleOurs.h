@@ -18,8 +18,7 @@ public:
     SimpleOurs(uint32_t _MEMORY, std::string _name = "SimpleOurs"){
         this->name = _name;
 
-        MEMORY = _MEMORY;
-        LENGTH = MEMORY / sizeof(Counter);
+        LENGTH = _MEMORY / sizeof(Counter);
 
         counter = new Counter[LENGTH];
         memset(counter, 0, sizeof(Counter) * LENGTH);
@@ -42,10 +41,17 @@ public:
         return counter[position].ID == item? counter[position].count : 0;
     }
 
-    COUNT_TYPE HHQuery(const DATA_TYPE item){
-        return Query(item);
+    HashMap HHQuery(const COUNT_TYPE thres){
+        HashMap ret;
+        for(uint32_t i = 0;i < LENGTH;++i){
+            if(counter[i].count > thres){
+                ret[counter[i].ID] = counter[i].count;
+            }
+        }
+        return ret;
     }
 
+    /*
     HashMap Merge(const DATA_TYPE mask){
         HashMap ret;
 
@@ -55,9 +61,9 @@ public:
 
         return ret;
     };
+     */
 
 private:
-    uint32_t MEMORY;
     uint32_t LENGTH;
 
     Counter* counter;

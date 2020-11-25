@@ -16,9 +16,8 @@ public:
     Ours(uint32_t _MEMORY, uint32_t _HASH_NUM, std::string _name = "Ours"){
         this->name = _name;
 
-        MEMORY = _MEMORY;
         HASH_NUM = _HASH_NUM;
-        LENGTH = MEMORY / HASH_NUM / sizeof(Counter);
+        LENGTH = _MEMORY / HASH_NUM / sizeof(Counter);
 
         counter = new Counter*[HASH_NUM];
         for(uint32_t i = 0;i < HASH_NUM;++i){
@@ -54,10 +53,22 @@ public:
         return ret / HASH_NUM;
     }
 
-    COUNT_TYPE HHQuery(const DATA_TYPE item){
-        return Query(item);
+    HashMap HHQuery(const COUNT_TYPE thres){
+        HashMap ret;
+        for(uint32_t i = 0;i < HASH_NUM;++i){
+            for(uint32_t j = 0;j < LENGTH;++j){
+                if(ret.find(counter[i][j].ID) == ret.end()){
+                    COUNT_TYPE temp = Query(counter[i][j].ID);
+                    if(temp > thres){
+                        ret[counter[i][j].ID] = temp;
+                    }
+                }
+            }
+        }
+        return ret;
     }
 
+    /*
     HashMap Merge(const DATA_TYPE mask){
         HashMap ret;
         HashMap used;
@@ -74,9 +85,9 @@ public:
 
         return ret;
     };
+     */
 
 private:
-    uint32_t MEMORY;
     uint32_t LENGTH;
     uint32_t HASH_NUM;
 

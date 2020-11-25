@@ -1,6 +1,7 @@
 #ifndef BENCHMARK_HEAP_H
 #define BENCHMARK_HEAP_H
 
+#include <algorithm>
 #include "CuckooMap.h"
 
 //Heap+Hash Table
@@ -10,11 +11,12 @@ class Heap{
 public:
 
     typedef std::pair<COUNT_TYPE, DATA_TYPE> KV;
-    typedef CuckooMap<DATA_TYPE, uint32_t> HashMap;
+    typedef CuckooMap<DATA_TYPE, uint32_t> Cuckoo;
+    typedef std::unordered_map<DATA_TYPE, COUNT_TYPE> HashMap;
 
-    Heap(uint32_t _MEMORY){
-	    SIZE = _MEMORY / (3 * sizeof(DATA_TYPE) + sizeof(COUNT_TYPE) + sizeof(uint32_t));
-        mp = new HashMap(SIZE);
+    Heap(uint32_t _SIZE){
+	    SIZE = _SIZE;
+        mp = new Cuckoo(SIZE);
         heap = new KV[SIZE];
         memset(heap, 0, sizeof(KV) * SIZE);
     }
@@ -22,6 +24,16 @@ public:
     ~Heap(){
         delete mp;
         delete [] heap;
+    }
+
+    static uint32_t Size2Memory(uint32_t size){
+        return size * ((sizeof(DATA_TYPE) + sizeof(uint32_t)) / LOAD
+        + sizeof(DATA_TYPE) + sizeof(COUNT_TYPE));
+    }
+
+    static uint32_t Memory2Size(uint32_t memory){
+        return memory / ((sizeof(DATA_TYPE) + sizeof(uint32_t)) / LOAD
+                         + sizeof(DATA_TYPE) + sizeof(COUNT_TYPE));
     }
 
     void Insert(const DATA_TYPE item, const COUNT_TYPE frequency){
@@ -46,9 +58,20 @@ public:
         return mp->Lookup(item)?  heap[(*mp)[item]].first : 0;
     }
 
+    HashMap HHQuery(const COUNT_TYPE thres){
+        HashMap ret;
+        uint32_t size = mp->size();
+        for(uint32_t i = 0;i < size;++i){
+            if(heap[i].first > thres){
+                ret[heap[i].second] = heap[i].first;
+            }
+        }
+        return ret;
+    }
+
 protected:
     uint32_t SIZE;
-    HashMap* mp;
+    Cuckoo* mp;
     KV* heap;
 
     inline bool isFull(){

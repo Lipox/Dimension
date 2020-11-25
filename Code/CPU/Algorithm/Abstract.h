@@ -17,9 +17,9 @@ public:
     typedef std::unordered_map<DATA_TYPE, COUNT_TYPE> HashMap;
 
     virtual void Insert(const DATA_TYPE item) = 0;
-    virtual COUNT_TYPE Query(const DATA_TYPE item) = 0;
-    virtual COUNT_TYPE HHQuery(const DATA_TYPE item) = 0;
-    virtual HashMap Merge(const DATA_TYPE mask){return HashMap();};
+    virtual COUNT_TYPE Query(const DATA_TYPE item){return 0;};
+    virtual HashMap HHQuery(const COUNT_TYPE thres){return HashMap();};
+    //virtual HashMap Merge(const DATA_TYPE mask){return HashMap();};
 };
 
 #endif //WINDOW_SKETCH_ABSTRACT_H

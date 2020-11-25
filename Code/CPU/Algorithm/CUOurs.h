@@ -16,9 +16,8 @@ public:
     CUOurs(uint32_t _MEMORY, uint32_t _HASH_NUM, std::string _name = "CUOurs"){
         this->name = _name;
 
-        MEMORY = _MEMORY;
         HASH_NUM = _HASH_NUM;
-        LENGTH = MEMORY / HASH_NUM / sizeof(Counter);
+        LENGTH = _MEMORY / HASH_NUM / sizeof(Counter);
 
         counter = new Counter*[HASH_NUM];
         for(uint32_t i = 0;i < HASH_NUM;++i){
@@ -75,10 +74,18 @@ public:
         return 0;
     }
 
-    COUNT_TYPE HHQuery(const DATA_TYPE item){
-        return Query(item);
+    HashMap HHQuery(const COUNT_TYPE thres){
+        HashMap ret;
+        for(uint32_t i = 0;i < HASH_NUM;++i){
+            for(uint32_t j = 0;j < LENGTH;++j){
+                if(counter[i][j].count > thres)
+                    ret[counter[i][j].ID] = counter[i][j].count;
+            }
+        }
+        return ret;
     }
 
+    /*
     HashMap Merge(const DATA_TYPE mask){
         HashMap ret;
 
@@ -90,9 +97,9 @@ public:
 
         return ret;
     };
+     */
 
 private:
-    uint32_t MEMORY;
     uint32_t LENGTH;
     uint32_t HASH_NUM;
 

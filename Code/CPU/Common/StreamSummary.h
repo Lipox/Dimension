@@ -29,6 +29,7 @@ public:
 template<typename DATA_TYPE, typename COUNT_TYPE>
 class StreamSummary{
 public:
+    typedef std::unordered_map<DATA_TYPE, COUNT_TYPE> HashMap;
 
     class DataNode;
     class CountNode;
@@ -45,11 +46,11 @@ public:
         CountNode(COUNT_TYPE _ID = 0):Node<COUNT_TYPE>(_ID),pData(nullptr){}
     };
 
-    typedef CuckooMap<DATA_TYPE, DataNode*> HashMap;
+    typedef CuckooMap<DATA_TYPE, DataNode*> Cuckoo;
 
-    StreamSummary(uint32_t _MEMORY){
-	    SIZE = _MEMORY / (3 * sizeof(DATA_TYPE) + 5 * sizeof(void*) + sizeof(COUNT_TYPE));
-        mp = new HashMap(SIZE);
+    StreamSummary(uint32_t _SIZE){
+	    SIZE = _SIZE;
+        mp = new Cuckoo(SIZE);
         min = new CountNode();
     }
 
@@ -71,12 +72,38 @@ public:
         }
     }
 
+    static uint32_t Size2Memory(uint32_t size){
+        return size * ((sizeof(DATA_TYPE) + sizeof(uint32_t)) / LOAD
+                       + sizeof(DATA_TYPE) + sizeof(COUNT_TYPE) + 4 * sizeof(void*));
+    }
+
+    static uint32_t Memory2Size(uint32_t memory){
+        return memory / ((sizeof(DATA_TYPE) + sizeof(uint32_t)) / LOAD
+                         + sizeof(DATA_TYPE) + sizeof(COUNT_TYPE) + 4 * sizeof(void*));
+    }
+
     uint32_t SIZE;
-    HashMap* mp;
+    Cuckoo* mp;
     CountNode* min;
 
     inline bool isFull(){
         return mp->size() >= SIZE;
+    }
+
+    HashMap HHQuery(const COUNT_TYPE thres){
+        HashMap ret;
+        CountNode* pCount = min;
+        while(pCount){
+            if(pCount->ID > thres){
+                DataNode* pData = pCount->pData;
+                while(pData){
+                    ret[pData->ID] = pCount->ID;
+                    pData = (DataNode*)pData->next;
+                }
+            }
+            pCount = (CountNode*)pCount->next;
+        }
+        return ret;
     }
 
     inline void New_Data(const DATA_TYPE& data){

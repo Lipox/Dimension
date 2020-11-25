@@ -5,14 +5,11 @@
 #include "Abstract.h"
 
 #define COUNTER_PER_BUCKET 7
-#define LAMBDA 8
-#define MAXNUM 0xffff
-
 
 template<typename DATA_TYPE, typename COUNT_TYPE>
 class Elastic : public Abstract<DATA_TYPE, COUNT_TYPE> {
 public:
-
+    typedef std::unordered_map<DATA_TYPE, COUNT_TYPE> HashMap;
     typedef uint16_t LIGHT_TYPE;
 
     struct Bucket{
@@ -98,21 +95,26 @@ public:
 		}
 	}
 
-    COUNT_TYPE HHQuery(const DATA_TYPE item){
-        uint8_t flag = 1;
-        COUNT_TYPE result = buckets[hash(item) % HEAVY_LENGTH].Query(item, flag);
-        if(result > 0 && flag){
-            return result + counters[hash(item, 101) % LIGHT_LENGTH];
+    HashMap HHQuery(const COUNT_TYPE thres){
+        HashMap ret;
+        for(uint32_t i = 0;i < HEAVY_LENGTH;++i){
+            for(uint32_t j = 0;j < COUNTER_PER_BUCKET;++j){
+                COUNT_TYPE temp = Query(buckets[i].ID[j]);
+                if(temp > thres){
+                    ret[buckets[i].ID[j]] = temp;
+                }
+            }
         }
-        else{
-            return result;
-        }
+        return ret;
     }
 
 private:
 
     const double HEAVY_RATIO = 0.25;
     const double LIGHT_RATIO = 0.75;
+
+    const uint32_t LAMBDA = 8;
+    const COUNT_TYPE MAXNUM = 0xffff;
 
     uint32_t LIGHT_LENGTH;
     uint32_t HEAVY_LENGTH;

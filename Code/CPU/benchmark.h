@@ -3,10 +3,11 @@
 
 #include <vector>
 
-#include "RHHH.h"
+//#include "RHHH.h"
 #include "Univmon.h"
 #include "Elastic.h"
-#include "BeauCoup.h"
+//#include "BeauCoup.h"
+#include "SpaceSaving.h"
 
 #include "Ours.h"
 #include "CUOurs.h"
@@ -40,11 +41,11 @@ public:
 
     void Parameter(double alpha){
         SketchVector sketches = {
-                new SimpleOurs<DATA_TYPE, COUNT_TYPE>(1000000, "HASH=1"),
-                new Ours<DATA_TYPE, COUNT_TYPE>(1000000, 2, "HASH=2"),
-                new CUOurs<DATA_TYPE, COUNT_TYPE>(1000000, 2, "CU-HASH=2"),
-                new CUOurs<DATA_TYPE, COUNT_TYPE>(1000000, 3, "CU-HASH=3"),
-        };
+                new UnivMon<DATA_TYPE, COUNT_TYPE>(2000000),
+                new CUOurs<DATA_TYPE, COUNT_TYPE>(2000000, 2),
+                new Elastic<DATA_TYPE, COUNT_TYPE>(2000000),
+                new SpaceSaving<DATA_TYPE, COUNT_TYPE>(2000000),
+       };
 
         for(auto sketch : sketches){
             SketchThp(sketch);
@@ -95,31 +96,30 @@ private:
     }
 
     void HHCheckError(Sketch sketch, uint32_t thres){
-        double aae = 0, are = 0, hh_record = 0, hh = 0, hh_hat = 0;
+        double aae = 0, are = 0, both = 0, hh = 0;
+
+        HashMap ret = sketch->HHQuery(thres);
 
         for(auto it = mp.begin();it != mp.end();++it){
-            COUNT_TYPE estimated = sketch->Query(it->first);
-
             if(it->second > thres){
                 hh += 1;
-                if(estimated > thres){
-                    hh_record += 1;
+                if(ret.find(it->first) != ret.end()){
+                    both += 1;
+                    COUNT_TYPE estimated = ret[it->first];
                     aae += abs(it->second - estimated);
                     are += abs(it->second - estimated) / (double)it->second;
                 }
             }
-
-            if(estimated > thres){
-                hh_hat += 1;
-            }
         }
 
         cout << sketch->name << endl;
-        cout << "AAE: " << aae / hh_record << endl;
-        cout << "ARE: " << are / hh_record << endl;
-        cout << "CR: " << hh_record / hh << endl;
-        cout << "PR: " << hh_record / hh_hat << endl;
+        cout << "AAE: " << aae / both << endl;
+        cout << "ARE: " << are / both << endl;
+        cout << "CR: " << both / hh << endl;
+        cout << "PR: " << both / ret.size() << endl;
     }
+
+
 };
 
 #endif //WINDOW_SKETCH_BENCHMARK_H
