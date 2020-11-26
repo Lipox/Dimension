@@ -30,8 +30,26 @@ public:
         }
     }
 
+    void Insert(DATA_TYPE* dataset, uint64_t length){
+        for(uint64_t i = 0;i < length;++i){
+            Insert(dataset[i]);
+        }
+    }
+
+    COUNT_TYPE Query(const DATA_TYPE item){
+        COUNT_TYPE temp = summary->Query(item);
+        if(temp > 0)
+            return temp;
+        else
+            return summary->getMin() - 1;
+    }
+
     HashMap HHQuery(const COUNT_TYPE thres){
         return summary->HHQuery(thres);
+    }
+
+    HashMap AllQuery(){
+        return summary->AllQuery();
     }
 
 private:

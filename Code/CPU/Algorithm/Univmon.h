@@ -38,6 +38,12 @@ public:
         }
     }
 
+    void Insert(DATA_TYPE* dataset, uint64_t length){
+        for(uint64_t i = 0;i < length;++i){
+            Insert(dataset[i]);
+        }
+    }
+
     COUNT_TYPE Query(DATA_TYPE item){
         uint32_t pos = hash(item, 199);
         int32_t level;
@@ -53,6 +59,7 @@ public:
         for(int32_t i = level - 2;i >= 0;--i){
             ret = 2 * ret - sketches[i]->Query(item);
         }
+
         return ret;
     }
 
@@ -60,7 +67,25 @@ public:
         HashMap ret, hhSet;
 
         for(uint32_t i = 0;i < LEVEL;++i){
-            HashMap temp = sketches[i]->HHQuery(thres);
+            HashMap temp = sketches[i]->AllQuery();
+            for(auto it = temp.begin();it != temp.end();++it){
+                if(hhSet.find(it->first) == hhSet.end()){
+                    hhSet[it->first] = it->second;
+                    COUNT_TYPE estimate = Query(it->first);
+                    if(estimate > thres)
+                        ret[it->first] = estimate;
+                }
+            }
+        }
+
+        return ret;
+    }
+
+    HashMap AllQuery(){
+        HashMap ret, hhSet;
+
+        for(uint32_t i = 0;i < LEVEL;++i){
+            HashMap temp = sketches[i]->AllQuery();
             for(auto it = temp.begin();it != temp.end();++it){
                 if(hhSet.find(it->first) == hhSet.end()){
                     hhSet[it->first] = it->second;

@@ -13,6 +13,9 @@
 #include "CUOurs.h"
 #include "SimpleOurs.h"
 
+#include "SketchMerge.h"
+//#include "TrafficMerge.h"
+
 #include "MMap.h"
 #include "Timer.h"
 
@@ -39,17 +42,52 @@ public:
         UnLoad(result);
     }
 
-    void Parameter(double alpha){
+    void FEBench(){
         SketchVector sketches = {
-                new UnivMon<DATA_TYPE, COUNT_TYPE>(2000000),
-                new CUOurs<DATA_TYPE, COUNT_TYPE>(2000000, 2),
-                new Elastic<DATA_TYPE, COUNT_TYPE>(2000000),
-                new SpaceSaving<DATA_TYPE, COUNT_TYPE>(2000000),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(1, 5000000),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(2, 5000000),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(4, 5000000),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(8, 5000000),
+
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, CSketch<DATA_TYPE, COUNT_TYPE>>(1, 5000000),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, CSketch<DATA_TYPE, COUNT_TYPE>>(2, 5000000),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, CSketch<DATA_TYPE, COUNT_TYPE>>(4, 5000000),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, CSketch<DATA_TYPE, COUNT_TYPE>>(8, 5000000),
+
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(1, 5000000),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(2, 5000000),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(4, 5000000),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(8, 5000000),
        };
 
         for(auto sketch : sketches){
             SketchThp(sketch);
             FECheckError(sketch);
+            delete sketch;
+        }
+    }
+
+    void HHBench(double alpha){
+        SketchVector sketches = {
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(1, 250000),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(2, 250000),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(4, 250000),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(8, 250000),
+
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, UnivMon<DATA_TYPE, COUNT_TYPE>>(1, 250000),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, UnivMon<DATA_TYPE, COUNT_TYPE>>(2, 250000),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, UnivMon<DATA_TYPE, COUNT_TYPE>>(4, 250000),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, UnivMon<DATA_TYPE, COUNT_TYPE>>(8, 250000),
+
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(1, 250000),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(2, 250000),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(4, 250000),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(8, 250000),
+
+        };
+
+        for(auto sketch : sketches){
+            SketchThp(sketch);
             HHCheckError(sketch, alpha * length);
             delete sketch;
         }
@@ -68,17 +106,11 @@ private:
         TP start, finish;
 
         start = now();
-        SketchInsert(sketch, dataset, length);
+        sketch->Insert(dataset, length);
         finish = now();
 
         cout << sketch->name << endl;
         cout << "Thp: " << length / durationms(finish, start) << endl;
-    }
-
-    inline void SketchInsert(Sketch sketch, DATA_TYPE* data, uint32_t size){
-        for(uint32_t i = 0;i < size;++i){
-            sketch->Insert(data[i]);
-        }
     }
 
     void FECheckError(Sketch sketch){

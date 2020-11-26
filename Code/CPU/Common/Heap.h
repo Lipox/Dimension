@@ -69,6 +69,15 @@ public:
         return ret;
     }
 
+    HashMap AllQuery(){
+        HashMap ret;
+        uint32_t size = mp->size();
+        for(uint32_t i = 0;i < size;++i){
+            ret[heap[i].second] = heap[i].first;
+        }
+        return ret;
+    }
+
 protected:
     uint32_t SIZE;
     Cuckoo* mp;

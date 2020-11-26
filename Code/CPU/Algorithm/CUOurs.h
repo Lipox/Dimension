@@ -13,7 +13,7 @@ public:
         COUNT_TYPE count;
     };
 
-    CUOurs(uint32_t _MEMORY, uint32_t _HASH_NUM, std::string _name = "CUOurs"){
+    CUOurs(uint32_t _MEMORY, uint32_t _HASH_NUM = 2, std::string _name = "CUOurs"){
         this->name = _name;
 
         HASH_NUM = _HASH_NUM;
@@ -64,6 +64,12 @@ public:
         return;
     }
 
+    void Insert(DATA_TYPE* dataset, uint64_t length){
+        for(uint64_t i = 0;i < length;++i){
+            Insert(dataset[i]);
+        }
+    }
+
     COUNT_TYPE Query(const DATA_TYPE item){
         for(uint32_t i = 0;i < HASH_NUM;++i){
             uint32_t position = hash(item, i) % LENGTH;
@@ -80,6 +86,16 @@ public:
             for(uint32_t j = 0;j < LENGTH;++j){
                 if(counter[i][j].count > thres)
                     ret[counter[i][j].ID] = counter[i][j].count;
+            }
+        }
+        return ret;
+    }
+
+    HashMap AllQuery(){
+        HashMap ret;
+        for(uint32_t i = 0;i < HASH_NUM;++i){
+            for(uint32_t j = 0;j < LENGTH;++j){
+                ret[counter[i][j].ID] = counter[i][j].count;
             }
         }
         return ret;

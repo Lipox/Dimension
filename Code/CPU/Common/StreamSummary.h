@@ -86,8 +86,17 @@ public:
     Cuckoo* mp;
     CountNode* min;
 
+
+    inline COUNT_TYPE getMin() {
+        return min->ID;
+    }
+
     inline bool isFull(){
         return mp->size() >= SIZE;
+    }
+
+    COUNT_TYPE Query(const DATA_TYPE item){
+        return mp->Lookup(item)?  (*mp)[item]->pCount->ID : 0;
     }
 
     HashMap HHQuery(const COUNT_TYPE thres){
@@ -100,6 +109,20 @@ public:
                     ret[pData->ID] = pCount->ID;
                     pData = (DataNode*)pData->next;
                 }
+            }
+            pCount = (CountNode*)pCount->next;
+        }
+        return ret;
+    }
+
+    HashMap AllQuery(){
+        HashMap ret;
+        CountNode* pCount = min;
+        while(pCount){
+            DataNode* pData = pCount->pData;
+            while(pData){
+                ret[pData->ID] = pCount->ID;
+                pData = (DataNode*)pData->next;
             }
             pCount = (CountNode*)pCount->next;
         }

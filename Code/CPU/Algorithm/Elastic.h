@@ -84,6 +84,12 @@ public:
         }
 	}
 
+    void Insert(DATA_TYPE* dataset, uint64_t length){
+        for(uint64_t i = 0;i < length;++i){
+            Insert(dataset[i]);
+        }
+    }
+
 	COUNT_TYPE Query(const DATA_TYPE item) {
 		uint8_t flag = 1;
 		COUNT_TYPE result = buckets[hash(item) % HEAVY_LENGTH].Query(item, flag);
@@ -103,6 +109,16 @@ public:
                 if(temp > thres){
                     ret[buckets[i].ID[j]] = temp;
                 }
+            }
+        }
+        return ret;
+    }
+
+    HashMap AllQuery(){
+        HashMap ret;
+        for(uint32_t i = 0;i < HEAVY_LENGTH;++i){
+            for(uint32_t j = 0;j < COUNTER_PER_BUCKET;++j){
+                ret[buckets[i].ID[j]] = Query(buckets[i].ID[j]);
             }
         }
         return ret;
