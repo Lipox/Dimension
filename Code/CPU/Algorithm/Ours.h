@@ -86,16 +86,14 @@ public:
         return ret;
     }
 
-    /*
-    HashMap Merge(const DATA_TYPE mask){
-        HashMap ret;
-        HashMap used;
+    HashMap Merge(DATA_TYPE MASK){
+        HashMap ret, used;
 
         for(uint32_t i = 0;i < HASH_NUM;++i){
             for(uint32_t j = 0;j < LENGTH;++j){
                 if(used.find(counter[i][j].ID) == used.end()){
                     used[counter[i][j].ID] = 1;
-                    DATA_TYPE ID = counter[i][j].ID & mask;
+                    DATA_TYPE ID = counter[i][j].ID & MASK;
                     ret[ID] += Query(counter[i][j].ID);
                 }
             }
@@ -103,7 +101,6 @@ public:
 
         return ret;
     };
-     */
 
 private:
     uint32_t LENGTH;

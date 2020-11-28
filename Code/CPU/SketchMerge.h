@@ -1,12 +1,6 @@
 #ifndef CPU_SKETCHMERGE_H
 #define CPU_SKETCHMERGE_H
 
-//#include "RHHH.h"
-#include "Univmon.h"
-#include "Elastic.h"
-//#include "BeauCoup.h"
-#include "SpaceSaving.h"
-
 template<typename DATA_TYPE, typename COUNT_TYPE, typename Sketch>
 class SketchMerge : public Abstract<DATA_TYPE, COUNT_TYPE>{
 public:

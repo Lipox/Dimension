@@ -65,17 +65,15 @@ public:
         return ret;
     }
 
-    /*
-    HashMap Merge(const DATA_TYPE mask){
+    HashMap Merge(DATA_TYPE MASK){
         HashMap ret;
 
         for(uint32_t j = 0;j < LENGTH;++j){
-            ret[counter[j].ID & mask] += counter[j].count;
+            ret[counter[j].ID & MASK] += counter[j].count;
         }
 
         return ret;
     };
-     */
 
 private:
     uint32_t LENGTH;

@@ -3,32 +3,31 @@
 
 #include <vector>
 
-//#include "RHHH.h"
+
 #include "Univmon.h"
 #include "Elastic.h"
-//#include "BeauCoup.h"
 #include "SpaceSaving.h"
+//#include "BeauCoup.h"
 
 #include "Ours.h"
 #include "CUOurs.h"
 #include "SimpleOurs.h"
 
 #include "SketchMerge.h"
-//#include "TrafficMerge.h"
 
 #include "MMap.h"
 #include "Timer.h"
 
 
 template<typename DATA_TYPE,typename COUNT_TYPE>
-class BenchMark{
+class SketchBench{
 public:
 
     typedef Abstract<DATA_TYPE, COUNT_TYPE>* Sketch;
     typedef std::vector<Sketch> SketchVector;
     typedef std::unordered_map<DATA_TYPE, COUNT_TYPE> HashMap;
 
-    BenchMark(const char* PATH){
+    SketchBench(const char* PATH){
         result = Load(PATH);
         dataset = (DATA_TYPE*)result.start;
         length = result.length / sizeof(DATA_TYPE);
@@ -38,26 +37,26 @@ public:
         }
     }
 
-    ~BenchMark(){
+    ~SketchBench(){
         UnLoad(result);
     }
 
-    void FEBench(){
+    void FEBench(uint32_t MEMORY){
         SketchVector sketches = {
-                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(1, 5000000),
-                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(2, 5000000),
-                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(4, 5000000),
-                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(8, 5000000),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(1, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(2, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(4, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(8, MEMORY),
 
-                new SketchMerge<DATA_TYPE, COUNT_TYPE, CSketch<DATA_TYPE, COUNT_TYPE>>(1, 5000000),
-                new SketchMerge<DATA_TYPE, COUNT_TYPE, CSketch<DATA_TYPE, COUNT_TYPE>>(2, 5000000),
-                new SketchMerge<DATA_TYPE, COUNT_TYPE, CSketch<DATA_TYPE, COUNT_TYPE>>(4, 5000000),
-                new SketchMerge<DATA_TYPE, COUNT_TYPE, CSketch<DATA_TYPE, COUNT_TYPE>>(8, 5000000),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, CSketch<DATA_TYPE, COUNT_TYPE>>(1, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, CSketch<DATA_TYPE, COUNT_TYPE>>(2, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, CSketch<DATA_TYPE, COUNT_TYPE>>(4, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, CSketch<DATA_TYPE, COUNT_TYPE>>(8, MEMORY),
 
-                new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(1, 5000000),
-                new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(2, 5000000),
-                new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(4, 5000000),
-                new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(8, 5000000),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(1, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(2, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(4, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(8, MEMORY),
        };
 
         for(auto sketch : sketches){
@@ -67,22 +66,22 @@ public:
         }
     }
 
-    void HHBench(double alpha){
+    void HHBench(uint32_t MEMORY, double alpha){
         SketchVector sketches = {
-                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(1, 250000),
-                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(2, 250000),
-                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(4, 250000),
-                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(8, 250000),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(1, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(2, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(4, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(8, MEMORY),
 
-                new SketchMerge<DATA_TYPE, COUNT_TYPE, UnivMon<DATA_TYPE, COUNT_TYPE>>(1, 250000),
-                new SketchMerge<DATA_TYPE, COUNT_TYPE, UnivMon<DATA_TYPE, COUNT_TYPE>>(2, 250000),
-                new SketchMerge<DATA_TYPE, COUNT_TYPE, UnivMon<DATA_TYPE, COUNT_TYPE>>(4, 250000),
-                new SketchMerge<DATA_TYPE, COUNT_TYPE, UnivMon<DATA_TYPE, COUNT_TYPE>>(8, 250000),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, UnivMon<DATA_TYPE, COUNT_TYPE>>(1, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, UnivMon<DATA_TYPE, COUNT_TYPE>>(2, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, UnivMon<DATA_TYPE, COUNT_TYPE>>(4, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, UnivMon<DATA_TYPE, COUNT_TYPE>>(8, MEMORY),
 
-                new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(1, 250000),
-                new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(2, 250000),
-                new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(4, 250000),
-                new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(8, 250000),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(1, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(2, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(4, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(8, MEMORY),
 
         };
 
@@ -150,7 +149,6 @@ private:
         cout << "CR: " << both / hh << endl;
         cout << "PR: " << both / ret.size() << endl;
     }
-
 
 };
 
