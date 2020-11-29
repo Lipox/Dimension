@@ -6,8 +6,6 @@
 
 #include <iostream>
 
-using namespace std;
-
 struct LoadResult{
     void* start;
     uint64_t length;
@@ -28,19 +26,19 @@ LoadResult Load(const char* PATH){
 
     int32_t fd = open(PATH, O_RDONLY);
     if(fd == -1) {
-        cerr << "Cannot open " << PATH << endl;
+        std::cerr << "Cannot open " << PATH << std::endl;
         throw;
     }
 
     struct stat sb;
     if(fstat(fd, &sb) == -1)
-        cerr << "Fstat Error\n";
+        std::cerr << "Fstat Error" << std::endl;
 
     ret.length = sb.st_size;
     ret.start = mmap(nullptr, ret.length, PROT_READ, MAP_PRIVATE, fd, 0u);
 
     if (ret.start == MAP_FAILED) {
-        cerr << "Cannot mmap " << PATH << " of length " << ret.length << endl;
+        std::cerr << "Cannot mmap " << PATH << " of length " << ret.length << std::endl;
         throw;
     }
 

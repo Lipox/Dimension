@@ -4,7 +4,7 @@
 #include <cmath>
 #include "Abstract.h"
 
-#define COUNTER_PER_BUCKET 7
+#define COUNTER_PER_BUCKET 4
 
 template<typename DATA_TYPE, typename COUNT_TYPE>
 class Elastic : public Abstract<DATA_TYPE, COUNT_TYPE> {

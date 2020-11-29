@@ -108,8 +108,8 @@ private:
         sketch->Insert(dataset, length);
         finish = now();
 
-        cout << sketch->name << endl;
-        cout << "Thp: " << length / durationms(finish, start) << endl;
+        std::cout << sketch->name << std::endl;
+        std::cout << "Thp: " << length / durationms(finish, start) << std::endl;
     }
 
     void FECheckError(Sketch sketch){
@@ -121,9 +121,9 @@ private:
             are += abs(it->second - estimated) / (double)it->second;
         }
 
-        cout << sketch->name << endl;
-        cout << "AAE: " << aae / mp.size() << endl;
-        cout << "ARE: " << are / mp.size() << endl;
+        std::cout << sketch->name << std::endl;
+        std::cout << "AAE: " << aae / mp.size() << std::endl;
+        std::cout << "ARE: " << are / mp.size() << std::endl;
     }
 
     void HHCheckError(Sketch sketch, uint32_t thres){
@@ -143,11 +143,11 @@ private:
             }
         }
 
-        cout << sketch->name << endl;
-        cout << "AAE: " << aae / both << endl;
-        cout << "ARE: " << are / both << endl;
-        cout << "CR: " << both / hh << endl;
-        cout << "PR: " << both / ret.size() << endl;
+        std::cout << sketch->name << std::endl;
+        std::cout << "AAE: " << aae / both << std::endl;
+        std::cout << "ARE: " << are / both << std::endl;
+        std::cout << "CR: " << both / hh << std::endl;
+        std::cout << "PR: " << both / ret.size() << std::endl;
     }
 
 };

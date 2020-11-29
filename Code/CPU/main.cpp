@@ -11,11 +11,11 @@ int main() {
         std::cout << file[i] << std::endl;
         SketchBench<uint64_t, int64_t> sketchBench(file[i]);
         sketchBench.FEBench(5000000);
-        sketchBench.HHBench(250000, 0.00005);
+        sketchBench.HHBench(1000000, 0.0001);
 
         TrafficBench<uint64_t, int64_t> trafficBench(file[i]);
         trafficBench.FEBench(20000000, 4);
-        trafficBench.HHBench(2000000, 4, 0.00005);
+        trafficBench.HHBench(2000000, 4, 0.0001);
     }
     return 0;
 }

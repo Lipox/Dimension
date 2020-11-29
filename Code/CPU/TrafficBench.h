@@ -54,6 +54,7 @@ public:
     void HHBench(uint32_t MEMORY, uint32_t K, double alpha){
         for(uint32_t i = 1;i <= K;++i){
             HHOursBench(MEMORY, i, alpha * length);
+            RHHHBench<SpaceSaving<DATA_TYPE, COUNT_TYPE>>(MEMORY, i, alpha * length);
             HHOtherBench<Elastic<DATA_TYPE, COUNT_TYPE>>(MEMORY, i, alpha * length);
             HHOtherBench<UnivMon<DATA_TYPE, COUNT_TYPE>>(MEMORY, i, alpha * length);
         }
@@ -113,8 +114,8 @@ public:
             vec[i] = new T(MEMORY / K);
         }
 
-        //RHHHInsert(vec, dataset, length);
-        //RHHHError(vec, K, thres);
+        RHHHInsert(vec, K, dataset, length);
+        RHHHError(vec, K, thres);
 
         for(uint32_t i = 0;i < K;++i){
             delete vec[i];
@@ -142,6 +143,13 @@ private:
         }
     }
 
+    inline void RHHHInsert(SketchVector vec, uint32_t K, DATA_TYPE* data, uint64_t length) {
+        for(uint32_t i = 0;i < length;++i){
+            uint32_t d = hash(data[i]) % K;
+            vec[d]->Insert(data[i] & MASK[d]);
+        }
+    }
+
     void FEOurError(OurSketch sketch, uint32_t K){
         double aae = 0, are = 0, total = 0;
 
@@ -156,9 +164,9 @@ private:
             }
         }
 
-        cout << sketch->name << endl;
-        cout << "AAE: " << aae / total << endl;
-        cout << "ARE: " << are / total << endl;
+        std::cout << sketch->name << std::endl;
+        std::cout << "AAE: " << aae / total << std::endl;
+        std::cout << "ARE: " << are / total << std::endl;
     }
 
     void HHOurError(OurSketch sketch, uint32_t K, uint32_t thres){
@@ -189,11 +197,11 @@ private:
             }
         }
 
-        cout << sketch->name << endl;
-        cout << "AAE: " << aae / both << endl;
-        cout << "ARE: " << are / both << endl;
-        cout << "CR: " << both / hh << endl;
-        cout << "PR: " << both / record << endl;
+        std::cout << sketch->name << std::endl;
+        std::cout << "AAE: " << aae / both << std::endl;
+        std::cout << "ARE: " << are / both << std::endl;
+        std::cout << "CR: " << both / hh << std::endl;
+        std::cout << "PR: " << both / record << std::endl;
     }
 
     void FEOtherError(SketchVector vec, uint32_t K){
@@ -208,9 +216,9 @@ private:
             }
         }
 
-        cout << vec[0]->name << endl;
-        cout << "AAE: " << aae / total << endl;
-        cout << "ARE: " << are / total << endl;
+        std::cout << vec[0]->name << std::endl;
+        std::cout << "AAE: " << aae / total << std::endl;
+        std::cout << "ARE: " << are / total << std::endl;
     }
 
     void HHOtherError(SketchVector vec, uint32_t K, uint32_t thres){
@@ -234,11 +242,39 @@ private:
             record += ret.size();
         }
 
-        cout << vec[0]->name << endl;
-        cout << "AAE: " << aae / both << endl;
-        cout << "ARE: " << are / both << endl;
-        cout << "CR: " << both / hh << endl;
-        cout << "PR: " << both / record << endl;
+        std::cout << vec[0]->name << std::endl;
+        std::cout << "AAE: " << aae / both << std::endl;
+        std::cout << "ARE: " << are / both << std::endl;
+        std::cout << "CR: " << both / hh << std::endl;
+        std::cout << "PR: " << both / record << std::endl;
+    }
+
+    void RHHHError(SketchVector vec, uint32_t K, uint32_t thres){
+        double aae = 0, are = 0, both = 0, hh = 0, record = 0;
+
+        for(uint32_t i = 0;i < K;++i){
+            HashMap ret = vec[i]->HHQuery(thres / K);
+
+            for(auto it = mp[i].begin();it != mp[i].end();++it){
+                if(it->second > thres){
+                    hh += 1;
+                    if(ret.find(it->first) != ret.end()){
+                        both += 1;
+                        COUNT_TYPE estimated = ret[it->first] * K;
+                        aae += abs(it->second - estimated);
+                        are += abs(it->second - estimated) / (double)it->second;
+                    }
+                }
+            }
+
+            record += ret.size();
+        }
+
+        std::cout << vec[0]->name << std::endl;
+        std::cout << "AAE: " << aae / both << std::endl;
+        std::cout << "ARE: " << are / both << std::endl;
+        std::cout << "CR: " << both / hh << std::endl;
+        std::cout << "PR: " << both / record << std::endl;
     }
 
 };

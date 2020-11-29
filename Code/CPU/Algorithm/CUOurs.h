@@ -33,14 +33,13 @@ public:
     }
 
     void Insert(const DATA_TYPE item){
-        uint32_t* position = new uint32_t [HASH_NUM];
+        std::vector<uint32_t> position(HASH_NUM);
         COUNT_TYPE minimum = 0x7fffffff;
 
         for(uint32_t i = 0;i < HASH_NUM;++i){
             position[i] = hash(item, i) % LENGTH;
             if(counter[i][position[i]].ID == item){
                 counter[i][position[i]].count += 1;
-                delete [] position;
                 return;
             }
             else{
@@ -54,13 +53,11 @@ public:
                 if(randomGenerator() % counter[i][position[i]].count == 0){
                     counter[i][position[i]].ID = item;
                 }
-                delete [] position;
                 return;
             }
         }
 
         std::cout << "Code Error" << std::endl;
-        delete [] position;
         return;
     }
 
