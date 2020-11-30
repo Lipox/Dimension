@@ -43,20 +43,26 @@ public:
 
     void FEBench(uint32_t MEMORY){
         SketchVector sketches = {
-                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(1, MEMORY),
+/*                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(1, MEMORY),
                 new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(2, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(3, MEMORY),
                 new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(4, MEMORY),
-                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(8, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(5, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(6, MEMORY),
 
                 new SketchMerge<DATA_TYPE, COUNT_TYPE, CSketch<DATA_TYPE, COUNT_TYPE>>(1, MEMORY),
                 new SketchMerge<DATA_TYPE, COUNT_TYPE, CSketch<DATA_TYPE, COUNT_TYPE>>(2, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, CSketch<DATA_TYPE, COUNT_TYPE>>(3, MEMORY),
                 new SketchMerge<DATA_TYPE, COUNT_TYPE, CSketch<DATA_TYPE, COUNT_TYPE>>(4, MEMORY),
-                new SketchMerge<DATA_TYPE, COUNT_TYPE, CSketch<DATA_TYPE, COUNT_TYPE>>(8, MEMORY),
-
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, CSketch<DATA_TYPE, COUNT_TYPE>>(5, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, CSketch<DATA_TYPE, COUNT_TYPE>>(6, MEMORY),
+*/
                 new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(1, MEMORY),
                 new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(2, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(3, MEMORY),
                 new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(4, MEMORY),
-                new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(8, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(5, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(6, MEMORY),
        };
 
         for(auto sketch : sketches){
@@ -70,18 +76,24 @@ public:
         SketchVector sketches = {
                 new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(1, MEMORY),
                 new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(2, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(3, MEMORY),
                 new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(4, MEMORY),
-                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(8, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(5, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, Elastic<DATA_TYPE, COUNT_TYPE>>(6, MEMORY),
 
                 new SketchMerge<DATA_TYPE, COUNT_TYPE, UnivMon<DATA_TYPE, COUNT_TYPE>>(1, MEMORY),
                 new SketchMerge<DATA_TYPE, COUNT_TYPE, UnivMon<DATA_TYPE, COUNT_TYPE>>(2, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, UnivMon<DATA_TYPE, COUNT_TYPE>>(3, MEMORY),
                 new SketchMerge<DATA_TYPE, COUNT_TYPE, UnivMon<DATA_TYPE, COUNT_TYPE>>(4, MEMORY),
-                new SketchMerge<DATA_TYPE, COUNT_TYPE, UnivMon<DATA_TYPE, COUNT_TYPE>>(8, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, UnivMon<DATA_TYPE, COUNT_TYPE>>(5, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, UnivMon<DATA_TYPE, COUNT_TYPE>>(6, MEMORY),
 
                 new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(1, MEMORY),
                 new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(2, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(3, MEMORY),
                 new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(4, MEMORY),
-                new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(8, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(5, MEMORY),
+                new SketchMerge<DATA_TYPE, COUNT_TYPE, CUOurs<DATA_TYPE, COUNT_TYPE>>(6, MEMORY),
 
         };
 
