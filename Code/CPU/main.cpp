@@ -1,3 +1,4 @@
+#include "HHHBench.h"
 #include "SketchBench.h"
 #include "TrafficBench.h"
 
