@@ -27,7 +27,7 @@ public:
         timestamp += 1;
 
         if(hash(timestamp) % sampleRate == 0){
-            mp[item][hash(timestamp, 17)] = 1;
+            mp[item][hash(timestamp, 17) % BITLEN] = 1;
         }
 
         return;
@@ -67,13 +67,13 @@ public:
 private:
     Table mp;
 
-    uint32_t sampleRate = 512;
+    uint32_t sampleRate = 128;
     uint64_t timestamp;
 
     inline COUNT_TYPE Count(std::bitset<BITLEN> bits){
-        uint32_t count = bits.count();
+        double count = bits.count();
         if(count >= BITLEN)
-            count = BITLEN - 1
+            count = BITLEN - 1;
         return - BITLEN * log(1.0 - count / BITLEN);
     }
 };

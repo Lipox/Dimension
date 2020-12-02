@@ -10,6 +10,9 @@ const char* file[] = {
 int main() {
     for(uint32_t i = 0;i < 1;++i){
         std::cout << file[i] << std::endl;
+        HHHBench<uint64_t, int64_t> hhhBench(file[i], 0.0001);
+        hhhBench.HHBench(2000000, 5, 0.0001);
+
         SketchBench<uint64_t, int64_t> sketchBench(file[i]);
         sketchBench.FEBench(10000000);
         sketchBench.HHBench(500000, 0.0001);

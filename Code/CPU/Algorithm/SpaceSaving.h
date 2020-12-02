@@ -48,6 +48,10 @@ public:
         return summary->HHQuery(thres);
     }
 
+    HashMap LHHQuery(const COUNT_TYPE thres){
+        return summary->LHHQuery(thres);
+    }
+
     HashMap AllQuery(){
         return summary->AllQuery();
     }

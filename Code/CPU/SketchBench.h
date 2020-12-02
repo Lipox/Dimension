@@ -7,7 +7,6 @@
 #include "Univmon.h"
 #include "Elastic.h"
 #include "SpaceSaving.h"
-#include "BeauCoup.h"
 
 #include "Ours.h"
 #include "CUOurs.h"

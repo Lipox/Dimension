@@ -115,6 +115,22 @@ public:
         return ret;
     }
 
+    HashMap LHHQuery(const COUNT_TYPE thres){
+        HashMap ret;
+        CountNode* pCount = min;
+        while(pCount){
+            if(pCount->ID > thres){
+                DataNode* pData = pCount->pData;
+                while(pData){
+                    ret[pData->ID] = pCount->ID - getMin();
+                    pData = (DataNode*)pData->next;
+                }
+            }
+            pCount = (CountNode*)pCount->next;
+        }
+        return ret;
+    }
+
     HashMap AllQuery(){
         HashMap ret;
         CountNode* pCount = min;
