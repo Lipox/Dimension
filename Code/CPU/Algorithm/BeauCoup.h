@@ -1,12 +1,18 @@
 #ifndef CPU_BEAUCOUP_H
 #define CPU_BEAUCOUP_H
 
+#include <math.h>
+#include <bitset>
+
 #include "Abstract.h"
+
+#define BITLEN 128
 
 template<typename DATA_TYPE,typename COUNT_TYPE>
 class BeauCoup : public Abstract<DATA_TYPE, COUNT_TYPE>{
 public:
     typedef std::unordered_map<DATA_TYPE, COUNT_TYPE> HashMap;
+    typedef std::unordered_map<DATA_TYPE, std::bitset<BITLEN>> Table;
 
     BeauCoup(uint32_t _MEMORY, std::string _name = "BeauCoup"){
         this->name = _name;
@@ -14,20 +20,14 @@ public:
     }
 
     ~BeauCoup(){
-        uint32_t out = 0;
-        for(auto it = mp.begin(); it != mp.end();++it){
-            if(it->second > 128)
-                out += 1;
-        }
-        std::cout << "Note: " << out << std::endl;
-        std::cout << mp.size() * 2 * (sizeof(DATA_TYPE) + sizeof(COUNT_TYPE)) << std::endl;
+        std::cout << mp.size() * 2 * (sizeof(DATA_TYPE) + BITLEN / 8) << std::endl;
     }
 
     void Insert(const DATA_TYPE item){
         timestamp += 1;
 
         if(hash(timestamp) % sampleRate == 0){
-            mp[item] += 1;
+            mp[item][hash(timestamp, 17)] = 1;
         }
 
         return;
@@ -41,7 +41,7 @@ public:
 
     COUNT_TYPE Query(const DATA_TYPE item){
         if(mp.find(item) != mp.end()){
-            return mp[item] * sampleRate;
+            return Count(mp[item]) * sampleRate;
         }
         return 0;
     }
@@ -49,21 +49,33 @@ public:
     HashMap HHQuery(const COUNT_TYPE thres){
         HashMap ret;
         for(auto it = mp.begin(); it != mp.end();++it){
-            if(it->second * sampleRate > thres)
-                ret[it->first] = it->second * sampleRate;
+            COUNT_TYPE estimated = Count(it->second);
+            if(estimated * sampleRate > thres)
+                ret[it->first] = estimated * sampleRate;
         }
         return ret;
     }
 
     HashMap AllQuery(){
-        return mp;
+        HashMap ret;
+        for(auto it = mp.begin(); it != mp.end();++it){
+            ret[it->first] = Count(it->second) * sampleRate;
+        }
+        return ret;
     }
 
 private:
-    HashMap mp;
+    Table mp;
 
     uint32_t sampleRate = 512;
     uint64_t timestamp;
+
+    inline COUNT_TYPE Count(std::bitset<BITLEN> bits){
+        uint32_t count = bits.count();
+        if(count >= BITLEN)
+            count = BITLEN - 1
+        return - BITLEN * log(1.0 - count / BITLEN);
+    }
 };
 
 #endif //CPU_BEAUCOUP_H
